@@ -41,6 +41,7 @@ from tesseract_core.runtime.core import (
 from tesseract_core.runtime.file_interactions import (
     output_to_bytes,
     read_from_path,
+    validate_gpu_transport_config,
     write_to_path,
 )
 from tesseract_core.runtime.mpa import start_run
@@ -566,6 +567,7 @@ def serve(
         _exit_when_parent_closes(parent_pipe_fd)
 
     config = get_config()
+    validate_gpu_transport_config()
     if config.debug:
         # The server is long-running, so a debugger can attach at any time.
         _start_debug_server(

@@ -100,6 +100,27 @@ def _cuda_device_available() -> bool:
         return False
 
 
+def validate_gpu_transport_config() -> None:
+    """Raise if the configured GPU transport cannot be served.
+
+    A user who explicitly configures a GPU transport expects it to work. When
+    this process cannot serve it (no CUDA runtime library, no visible device,
+    or a failed initialisation), fail fast at startup rather than silently
+    running without it.
+    """
+    from tesseract_core.runtime.config import get_config
+
+    configured = get_config().gpu_transport
+    if configured == "none":
+        return
+    if _cuda_device_available():
+        return
+    raise ValueError(
+        f"gpu_transport={configured!r} is configured, but this Tesseract cannot "
+        "use a CUDA device, so it cannot serve that transport."
+    )
+
+
 def available_compressions() -> tuple[str, ...]:
     """Output compressions the runtime accepts (``none`` disables compression)."""
     return ("none", *get_args(compression_type))

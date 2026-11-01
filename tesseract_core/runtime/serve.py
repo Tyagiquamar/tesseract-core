@@ -27,6 +27,7 @@ from .file_interactions import (
     available_gpu_transports,
     join_paths,
     output_to_bytes,
+    validate_gpu_transport_config,
 )
 from .mpa import start_run
 from .profiler import Profiler
@@ -305,9 +306,9 @@ def serve(host: str, port: int, num_workers: int) -> None:
             f"gpu_transport={gpu_transport!r} cannot be served by more than one "
             f"worker (got num_workers={num_workers})."
         )
-    # Check the configured GPU transport before serving, so a server that cannot
-    # use it says so in its log rather than only to the first client.
-    available_gpu_transports()
+    # Fail fast if the configured GPU transport cannot be served, rather than
+    # only telling the first client.
+    validate_gpu_transport_config()
     os.environ.update(config_overrides_as_env())
     uvicorn.run(
         "tesseract_core.runtime.app_http:app",
